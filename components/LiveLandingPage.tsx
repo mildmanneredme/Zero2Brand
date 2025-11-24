@@ -23,7 +23,7 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
     const { className: btnClassHero, style: btnStyleHero } = getButtonDynamicStyles(buttonStyle, themePalette, 'hero');
 
     // Common button classes for sizing and animation
-    const commonBtnClasses = `min-w-[160px] text-center justify-center ${buttonAnimation.class}`;
+    const commonBtnClasses = `min-w-[180px] px-8 py-3 text-center justify-center ${buttonAnimation.class}`;
     const heroBtnClasses = `${btnClassHero} ${commonBtnClasses}`;
     const secondaryBtnClasses = `${btnClassSecondary} ${commonBtnClasses}`;
     const primaryBtnClasses = `${btnClassPrimary} ${commonBtnClasses}`;

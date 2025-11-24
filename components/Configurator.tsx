@@ -89,7 +89,7 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
                         className={`w-full text-left p-3 rounded-xl transition-all border-2 ${selectedFontIndex === i ? 'border-black bg-gray-50' : 'border-transparent hover:bg-gray-50'
                             }`}
                     >
-                        <div className="text-lg" style={{ fontFamily: font.headerFont }}>{font.name}</div>
+                        <div className="text-lg font-semibold text-gray-900" style={{ fontFamily: font.headerFont }}>{font.name}</div>
                         <div className="text-sm text-gray-500" style={{ fontFamily: font.bodyFont }}>
                             {font.description}
                         </div>
