@@ -117,23 +117,60 @@ export const generateSiteContent = async (mission: string): Promise<{ headline: 
   }
 };
 
+export const identifyLogoSubjects = async (mission: string): Promise<string[]> => {
+  const ai = await getAIClient();
+  const prompt = `
+    Analyze this company mission: "${mission}"
+    Identify 4 distinct, concrete physical objects or symbols that could represent this brand in a logo.
+    Examples:
+    - "Coffee shop" -> ["coffee mug", "coffee bean", "steam", "croissant"]
+    - "Tech startup" -> ["circuit node", "rocket", "pixel", "abstract geometric shape"]
+    - "Bakery" -> ["wheat stalk", "bread loaf", "whisk", "cupcake"]
+    
+    Return ONLY a JSON array of strings, e.g. ["object1", "object2", "object3", "object4"]
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash-001',
+      contents: { parts: [{ text: prompt }] },
+      config: { responseMimeType: 'application/json' }
+    });
+
+    const text = response.response.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return ["abstract shape", "geometric icon", "minimalist symbol", "modern emblem"];
+
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("Failed to identify logo subjects:", e);
+    return ["abstract shape", "geometric icon", "minimalist symbol", "modern emblem"];
+  }
+};
+
 export const generateLogoVariations = async (mission: string, palette: any, count: number = 4): Promise<string[]> => {
   const ai = await getAIClient();
   const logos: string[] = [];
 
-  const styles = ['minimal and modern', 'bold and geometric', 'abstract and artistic', 'clean and professional'];
+  // First, identify what to draw
+  const subjects = await identifyLogoSubjects(mission);
+  const styles = ['minimalist line art', 'bold geometric', 'modern flat design', 'abstract artistic'];
 
   try {
     for (let i = 0; i < Math.min(count, styles.length); i++) {
-      const prompt = `Create a simple, iconic logo for a company with this mission: "${mission}". 
-      Style: ${styles[i]}. 
-      Use colors: ${palette.colors.primary}, ${palette.colors.secondary}. 
-      The logo should be clean, scalable, and work well at small sizes.
-      No text, just the icon/symbol.`;
+      const subject = subjects[i % subjects.length];
+      const style = styles[i];
+
+      const prompt = `
+        Design a professional logo icon.
+        Subject: A ${subject}.
+        Style: ${style}.
+        Colors: Primary ${palette.colors.primary}, Secondary ${palette.colors.secondary}.
+        Requirements: High quality, vector style, white background, no text, centered, iconic.
+      `;
 
       try {
         const response = await ai.models.generateContent({
-          model: 'gemini-3-pro-image-preview',
+          model: 'gemini-3-pro-image-preview', // Keeping this model as it's the one available in this env
           contents: {
             parts: [{ text: prompt }]
           },
@@ -148,9 +185,11 @@ export const generateLogoVariations = async (mission: string, palette: any, coun
         if (response?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
           const base64 = response.candidates[0].content.parts[0].inlineData.data;
           logos.push(`data:image/png;base64,${base64}`);
+        } else {
+          console.warn(`No image data in response for ${subject}`);
         }
       } catch (err) {
-        console.warn(`Failed to generate logo variation ${i + 1}:`, err);
+        console.warn(`Failed to generate logo variation ${i + 1} (${subject}):`, err);
       }
     }
   } catch (error) {
