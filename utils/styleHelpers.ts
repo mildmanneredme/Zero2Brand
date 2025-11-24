@@ -14,14 +14,13 @@ export const getButtonDynamicStyles = (
 
     switch (buttonStyle.type) {
         case 'solid':
-        case 'pill': // Assuming 'pill' maps to solid logic if not explicitly handled
             if (variant === 'primary' || variant === 'hero') {
                 baseStyle.backgroundColor = colors.primary;
                 baseStyle.color = '#ffffff';
             } else {
                 baseStyle.backgroundColor = 'transparent';
                 baseStyle.border = `2px solid ${colors.primary}`;
-                baseStyle.color = colors.primary;
+                baseStyle.color = colors.text; // Use text color for better readability on secondary
             }
             break;
         case 'outline':
@@ -39,8 +38,8 @@ export const getButtonDynamicStyles = (
                 baseStyle.color = colors.text;
                 baseStyle.opacity = 0.9;
             } else {
-                baseStyle.backgroundColor = 'transparent';
-                baseStyle.color = colors.secondary;
+                baseStyle.backgroundColor = `${colors.secondary}40`; // More transparent for secondary
+                baseStyle.color = colors.text;
             }
             break;
         case 'gradient':
@@ -50,7 +49,7 @@ export const getButtonDynamicStyles = (
             } else {
                 baseStyle.backgroundImage = 'none';
                 baseStyle.border = `2px solid ${colors.primary}`;
-                baseStyle.color = colors.primary;
+                baseStyle.color = colors.text;
                 // Text gradient clip could be cool here but complex
             }
             break;
@@ -61,7 +60,8 @@ export const getButtonDynamicStyles = (
             if (variant === 'secondary') {
                 baseStyle.backgroundColor = 'transparent';
                 baseStyle.border = `1px solid ${colors.primary}`;
-                baseStyle.boxShadow = `0 0 5px ${colors.primary}`;
+                baseStyle.boxShadow = `0 0 5px ${colors.primary}`; // Keep glow but smaller
+                baseStyle.color = colors.primary;
             }
             break;
         case 'glass':
@@ -70,6 +70,8 @@ export const getButtonDynamicStyles = (
             baseStyle.color = '#ffffff';
             if (variant === 'secondary') {
                 baseStyle.backgroundColor = `${colors.secondary}20`;
+                baseStyle.borderColor = `${colors.secondary}60`;
+                baseStyle.color = colors.text;
             }
             break;
         case 'ghost':
@@ -87,8 +89,10 @@ export const getButtonDynamicStyles = (
             baseStyle.color = '#ffffff';
             baseStyle.borderBottomColor = colors.secondary; // Darker shade ideally
             if (variant === 'secondary') {
-                baseStyle.backgroundColor = colors.secondary;
-                baseStyle.borderBottomColor = colors.primary;
+                baseStyle.backgroundColor = 'transparent';
+                baseStyle.border = `2px solid ${colors.primary}`;
+                baseStyle.borderBottom = `4px solid ${colors.primary}`; // Keep 3D effect
+                baseStyle.color = colors.text;
             }
             break;
         case 'brutalist':
@@ -98,6 +102,9 @@ export const getButtonDynamicStyles = (
             baseStyle.boxShadow = `4px 4px 0px 0px ${colors.text}`;
             if (variant === 'secondary') {
                 baseStyle.backgroundColor = 'transparent';
+                baseStyle.border = `2px solid ${colors.text}`;
+                baseStyle.boxShadow = `2px 2px 0px 0px ${colors.text}`; // Keep shadow but smaller
+                baseStyle.color = colors.text;
             }
             break;
         case 'anime':
@@ -105,8 +112,12 @@ export const getButtonDynamicStyles = (
             baseStyle.color = '#ffffff';
             baseStyle.borderColor = colors.secondary;
             if (variant === 'secondary') {
-                baseStyle.backgroundColor = '#fff';
-                baseStyle.color = colors.primary;
+                baseStyle.backgroundColor = 'transparent';
+                baseStyle.border = `2px solid ${colors.primary}`;
+                baseStyle.borderLeft = `4px solid ${colors.primary}`; // Keep anime accents
+                baseStyle.borderRight = `4px solid ${colors.primary}`;
+                baseStyle.color = colors.text;
+                // Skew is handled by className, so it persists
             }
             break;
         case 'cyberpunk':
@@ -116,6 +127,11 @@ export const getButtonDynamicStyles = (
             baseStyle.boxShadow = `0 0 5px ${colors.accent}`;
             if (variant === 'primary') {
                 baseStyle.backgroundColor = `${colors.accent}20`;
+            }
+            if (variant === 'secondary') {
+                baseStyle.borderStyle = 'dashed'; // Glitchy feel
+                baseStyle.boxShadow = 'none';
+                baseStyle.color = colors.text;
             }
             break;
         case 'pixel':
@@ -128,7 +144,12 @@ export const getButtonDynamicStyles = (
         4px 4px 0px 0px ${colors.secondary}
       `;
             if (variant === 'secondary') {
-                baseStyle.backgroundColor = colors.secondary;
+                baseStyle.backgroundColor = 'transparent';
+                baseStyle.color = colors.text;
+                baseStyle.boxShadow = `
+                    2px 2px 0px 0px ${colors.text},
+                    inset 2px 2px 0px 0px ${colors.text}
+                 `; // Pixelated border effect
             }
             break;
         case 'spotlight':
@@ -140,9 +161,9 @@ export const getButtonDynamicStyles = (
 
             if (variant === 'secondary') {
                 baseStyle.backgroundColor = 'transparent';
-                baseStyle.boxShadow = 'none';
-                baseStyle.border = `1px solid ${colors.primary}`;
-                baseStyle.color = colors.primary;
+                baseStyle.boxShadow = `inset 0 4px 10px -5px ${colors.primary}`; // Subtle inner glow
+                baseStyle.border = `1px solid ${colors.primary}60`;
+                baseStyle.color = colors.text;
             }
             break;
         default:

@@ -18,7 +18,7 @@ export interface ColorPalette {
 
 export interface ButtonStyle {
     name: string;
-    type: 'solid' | 'outline' | 'soft' | 'gradient' | 'glow' | 'glass' | 'ghost' | 'text' | '3d' | 'brutalist' | 'anime' | 'cyberpunk' | 'vinyl' | 'pixel';
+    type: 'solid' | 'outline' | 'soft' | 'gradient' | 'glow' | 'glass' | 'ghost' | 'text' | '3d' | 'brutalist' | 'anime' | 'cyberpunk' | 'pixel' | 'spotlight';
     classes: string; // Structural classes only (padding, rounded, etc.)
     description: string;
 }
