@@ -1,17 +1,21 @@
 import React from 'react';
 import { FontPair, ColorPalette, ButtonStyle } from '../data/variations';
 import { getButtonDynamicStyles } from '../utils/styleHelpers';
+import { getThemeColors } from '../utils/colorUtils';
 
 interface LiveLandingPageProps {
     font: FontPair;
     palette: ColorPalette;
     buttonStyle: ButtonStyle;
     mission: string;
+    mode: 'dark' | 'light';
 }
 
-export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, mission }) => {
-    const { colors } = palette;
-    const { className: btnClass, style: btnStyle } = getButtonDynamicStyles(buttonStyle, palette);
+export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, mission, mode }) => {
+    const colors = getThemeColors(palette, mode);
+    // We need to pass the *adjusted* palette to the button helper so buttons match the theme
+    const themePalette = { ...palette, colors };
+    const { className: btnClass, style: btnStyle } = getButtonDynamicStyles(buttonStyle, themePalette);
 
     return (
         <div

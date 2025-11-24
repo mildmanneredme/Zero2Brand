@@ -10,6 +10,8 @@ interface ConfiguratorProps {
     onPaletteChange: (index: number) => void;
     onButtonChange: (index: number) => void;
     onComplete: () => void;
+    mode: 'dark' | 'light';
+    onModeChange: (mode: 'dark' | 'light') => void;
 }
 
 export const Configurator: React.FC<ConfiguratorProps> = ({
@@ -19,7 +21,9 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
     onFontChange,
     onPaletteChange,
     onButtonChange,
-    onComplete
+    onComplete,
+    mode,
+    onModeChange
 }) => {
     const [activeTab, setActiveTab] = useState<'fonts' | 'colors' | 'buttons'>('fonts');
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -38,14 +42,25 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
     return (
         <div className="fixed bottom-8 right-8 w-96 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] z-50 animate-fade-in">
             {/* Header */}
-            <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-                <h3 className="text-white font-bold">Brand Configurator</h3>
-                <button
-                    onClick={() => setIsCollapsed(true)}
-                    className="text-slate-400 hover:text-white"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
-                </button>
+            <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>🎨</span> Brand Builder
+                </h2>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => onModeChange(mode === 'dark' ? 'light' : 'dark')}
+                        className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+                        title={`Switch to ${mode === 'dark' ? 'Light' : 'Dark'} Mode`}
+                    >
+                        {mode === 'dark' ? '☀️' : '🌙'}
+                    </button>
+                    <button
+                        onClick={() => setIsCollapsed(true)}
+                        className="text-slate-400 hover:text-white"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
+                    </button>
+                </div>
             </div>
 
             {/* Tabs */}

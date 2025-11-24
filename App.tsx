@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [selectedFontIndex, setSelectedFontIndex] = useState(0);
   const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
+  const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
 
   // Derived Concept (constructed from live builder state)
   const [finalConcept, setFinalConcept] = useState<BrandConcept | null>(null);
@@ -155,6 +156,7 @@ const App: React.FC = () => {
           palette={PALETTES[selectedPaletteIndex]}
           buttonStyle={BUTTON_STYLES[selectedButtonIndex]}
           mission={mission}
+          mode={themeMode}
         />
         <Configurator
           selectedFontIndex={selectedFontIndex}
@@ -164,6 +166,8 @@ const App: React.FC = () => {
           onPaletteChange={setSelectedPaletteIndex}
           onButtonChange={setSelectedButtonIndex}
           onComplete={handleBuilderComplete}
+          mode={themeMode}
+          onModeChange={setThemeMode}
         />
       </div>
     );
