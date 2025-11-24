@@ -116,3 +116,46 @@ export const generateSiteContent = async (mission: string): Promise<{ headline: 
     };
   }
 };
+
+export const generateLogoVariations = async (mission: string, palette: any, count: number = 4): Promise<string[]> => {
+  const ai = await getAIClient();
+  const logos: string[] = [];
+
+  const styles = ['minimal and modern', 'bold and geometric', 'abstract and artistic', 'clean and professional'];
+
+  try {
+    for (let i = 0; i < Math.min(count, styles.length); i++) {
+      const prompt = `Create a simple, iconic logo for a company with this mission: "${mission}". 
+      Style: ${styles[i]}. 
+      Use colors: ${palette.colors.primary}, ${palette.colors.secondary}. 
+      The logo should be clean, scalable, and work well at small sizes.
+      No text, just the icon/symbol.`;
+
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-3-pro-image-preview',
+          contents: {
+            parts: [{ text: prompt }]
+          },
+          config: {
+            imageConfig: {
+              imageSize: '1K',
+              aspectRatio: '1:1'
+            }
+          }
+        });
+
+        if (response?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
+          const base64 = response.candidates[0].content.parts[0].inlineData.data;
+          logos.push(`data:image/png;base64,${base64}`);
+        }
+      } catch (err) {
+        console.warn(`Failed to generate logo variation ${i + 1}:`, err);
+      }
+    }
+  } catch (error) {
+    console.error('Logo generation error:', error);
+  }
+
+  return logos;
+};

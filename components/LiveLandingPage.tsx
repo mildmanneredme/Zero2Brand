@@ -11,9 +11,11 @@ interface LiveLandingPageProps {
     mission: string;
     mode: 'dark' | 'light';
     content: { headline: string, subheadline: string, cta: string, features: string[] } | null;
+    logoUrl?: string;
+    onLogoClick?: () => void;
 }
 
-export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, buttonAnimation, mission, mode, content }) => {
+export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, buttonAnimation, mission, mode, content, logoUrl, onLogoClick }) => {
     const colors = getThemeColors(palette, mode);
     const themePalette = { ...palette, colors };
 
@@ -45,7 +47,17 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
             {/* Navbar */}
             <nav className="flex justify-between items-center px-12 py-6">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: colors.primary }}></div>
+                    {logoUrl ? (
+                        <button
+                            onClick={onLogoClick}
+                            className="w-10 h-10 rounded-lg overflow-hidden hover:scale-110 transition-transform cursor-pointer"
+                            title="Click to change logo"
+                        >
+                            <img src={logoUrl} alt="Brand Logo" className="w-full h-full object-cover" />
+                        </button>
+                    ) : (
+                        <div className="w-10 h-10 rounded-lg" style={{ backgroundColor: colors.primary }}></div>
+                    )}
                     <span className="font-bold text-xl tracking-tight" style={{ fontFamily: font.headerFont }}>BrandName</span>
                 </div>
                 <div className="flex gap-8 text-sm font-medium opacity-80">

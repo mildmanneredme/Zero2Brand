@@ -9,7 +9,9 @@ import { LiveLandingPage } from './components/LiveLandingPage';
 import { Configurator } from './components/Configurator';
 import { FontLoader } from './components/FontLoader';
 import { FONTS, PALETTES, BUTTON_STYLES, BUTTON_ANIMATIONS } from './data/variations';
-import { generateBrandConcepts, generateBrandImage, generateSiteContent } from './services/gemini';
+import { generateBrandConcepts, generateBrandImage, generateSiteContent, generateLogoVariations } from './services/gemini';
+import { generateFallbackLogos } from './utils/fallbackLogos';
+import { LogoModal } from './components/LogoModal';
 
 enum AppState {
   Input,
@@ -30,6 +32,9 @@ const App: React.FC = () => {
   const [selectedAnimationIndex, setSelectedAnimationIndex] = useState(1); // Default to Scale Up
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
   const [siteContent, setSiteContent] = useState<{ headline: string, subheadline: string, cta: string, features: string[] } | null>(null);
+  const [logoVariations, setLogoVariations] = useState<string[]>([]);
+  const [selectedLogoIndex, setSelectedLogoIndex] = useState(0);
+  const [showLogoModal, setShowLogoModal] = useState(false);
 
   // Derived Concept (constructed from live builder state)
   const [finalConcept, setFinalConcept] = useState<BrandConcept | null>(null);
@@ -72,14 +77,29 @@ const App: React.FC = () => {
     setState(AppState.GeneratingConcepts);
 
     try {
-      // Generate content
-      const content = await generateSiteContent(mission);
+      // Generate content and logos in parallel
+      const [content, apiLogos] = await Promise.all([
+        generateSiteContent(mission),
+        generateLogoVariations(mission, PALETTES[selectedPaletteIndex], 4)
+      ]);
+
       setSiteContent(content);
+
+      // Use API logos if available, otherwise use fallbacks
+      if (apiLogos && apiLogos.length > 0) {
+        setLogoVariations(apiLogos);
+      } else {
+        const fallbacks = generateFallbackLogos(PALETTES[selectedPaletteIndex]);
+        setLogoVariations(fallbacks);
+      }
 
       // Once content is ready, switch to builder
       setState(AppState.LiveBuilder);
     } catch (e) {
-      console.error("Failed to generate content", e);
+      console.error("Failed to generate content/logos", e);
+      // Use fallback logos
+      const fallbacks = generateFallbackLogos(PALETTES[selectedPaletteIndex]);
+      setLogoVariations(fallbacks);
       // Fallback to builder even if generation fails (will use default text)
       setState(AppState.LiveBuilder);
     }
@@ -182,6 +202,8 @@ const App: React.FC = () => {
             mission={mission}
             mode={themeMode}
             content={siteContent}
+            logoUrl={logoVariations[selectedLogoIndex]}
+            onLogoClick={() => setShowLogoModal(true)}
           />
         </>
         <Configurator
@@ -196,6 +218,14 @@ const App: React.FC = () => {
           mode={themeMode}
           onModeChange={setThemeMode}
         />
+        {showLogoModal && (
+          <LogoModal
+            logos={logoVariations}
+            selectedIndex={selectedLogoIndex}
+            onSelect={setSelectedLogoIndex}
+            onClose={() => setShowLogoModal(false)}
+          />
+        )}
       </div>
     );
   }
