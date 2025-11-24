@@ -18,7 +18,7 @@ export interface ColorPalette {
 
 export interface ButtonStyle {
     name: string;
-    type: 'solid' | 'outline' | 'soft' | 'gradient' | 'glow' | 'glass' | 'ghost' | 'text' | '3d' | 'brutalist';
+    type: 'solid' | 'outline' | 'soft' | 'gradient' | 'glow' | 'glass' | 'ghost' | 'text' | '3d' | 'brutalist' | 'anime' | 'cyberpunk' | 'vinyl' | 'pixel';
     classes: string; // Structural classes only (padding, rounded, etc.)
     description: string;
 }
@@ -39,11 +39,11 @@ export const BUTTON_STYLES: ButtonStyle[] = [
     { name: "Neon Glow", type: "glow", classes: "text-white rounded-md px-6 py-2 transition-all", description: "Neon glow" },
     { name: "3D Pressable", type: "3d", classes: "text-white border-b-4 rounded-lg active:border-b-0 active:translate-y-1 px-6 py-2 transition-all", description: "Chunky 3D effect" },
     { name: "Ghost", type: "ghost", classes: "bg-transparent rounded-full px-6 py-2 transition-all hover:bg-opacity-10", description: "Semi-transparent" },
-    { name: "Elegant Border", type: "outline", classes: "bg-transparent border rounded-sm px-8 py-2 transition-colors duration-300 hover:text-white", description: "Thin border" },
-    { name: "Tech Outline", type: "outline", classes: "bg-transparent border rounded-none font-mono px-6 py-2 transition-all hover:bg-opacity-10", description: "Monospace tech" },
-    { name: "Playful Rotate", type: "solid", classes: "text-white rounded-2xl hover:rotate-3 hover:scale-105 transition-transform px-6 py-2 shadow-md", description: "Rotates on hover" },
-    { name: "Underline Slide", type: "solid", classes: "relative overflow-hidden text-white rounded-lg group px-6 py-2 transition-all", description: "Standard dark" },
-    { name: "Double Border", type: "outline", classes: "bg-white border-4 border-double rounded-lg px-6 py-2 transition-all hover:bg-opacity-10", description: "Double line" },
+    { name: "Anime Speed", type: "anime", classes: "text-white -skew-x-12 border-l-4 border-r-4 px-8 py-2 hover:skew-x-0 hover:scale-110 transition-all duration-300 uppercase font-black tracking-wider", description: "High energy skew" },
+    { name: "Cyberpunk Glitch", type: "cyberpunk", classes: "text-white rounded-none border border-current px-6 py-2 font-mono uppercase tracking-widest hover:shadow-[0_0_10px_currentColor] transition-all relative overflow-hidden group", description: "Tech glitch effect" },
+    { name: "Vinyl Record", type: "vinyl", classes: "text-transparent rounded-full w-12 h-12 flex items-center justify-center hover:animate-spin transition-all shadow-xl border-4 border-gray-900 relative overflow-hidden", description: "Spinning record" },
+    { name: "Retro Pixel", type: "pixel", classes: "text-white px-6 py-2 font-mono text-xs uppercase tracking-widest hover:translate-y-1 transition-none", description: "8-bit arcade style" },
+    { name: "Neobrutalism", type: "brutalist", classes: "border-4 border-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-bold transition-all bg-white text-black", description: "Trendy bold style" },
     { name: "Circle Icon", type: "solid", classes: "text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:scale-110 transition-all", description: "Icon only (circle)" },
     { name: "Floating Fab", type: "solid", classes: "text-white rounded-full shadow-xl hover:scale-110 hover:shadow-2xl transition-all px-6 py-3", description: "Floating action" }
 ];

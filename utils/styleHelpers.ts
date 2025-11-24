@@ -54,6 +54,31 @@ export const getButtonDynamicStyles = (style: ButtonStyle, palette: ColorPalette
             baseStyle.borderColor = colors.text;
             baseStyle.boxShadow = `4px 4px 0px 0px ${colors.text}`;
             break;
+        case 'anime':
+            baseStyle.backgroundColor = colors.primary;
+            baseStyle.color = '#ffffff';
+            baseStyle.borderColor = colors.secondary;
+            break;
+        case 'cyberpunk':
+            baseStyle.backgroundColor = 'transparent';
+            baseStyle.color = colors.accent;
+            baseStyle.borderColor = colors.accent;
+            baseStyle.boxShadow = `0 0 5px ${colors.accent}`;
+            break;
+        case 'vinyl':
+            baseStyle.background = `conic-gradient(#1a1a1a 0%, #333 10%, #1a1a1a 20%, #333 30%, #1a1a1a 40%, ${colors.primary} 50%, #1a1a1a 60%, #333 70%, #1a1a1a 80%, #333 90%, #1a1a1a 100%)`;
+            baseStyle.borderColor = '#111';
+            break;
+        case 'pixel':
+            baseStyle.backgroundColor = colors.primary;
+            baseStyle.color = '#ffffff';
+            baseStyle.boxShadow = `
+        inset 2px 2px 0px 0px #ffffff40,
+        inset -2px -2px 0px 0px #00000040,
+        2px 2px 0px 0px #000000,
+        4px 4px 0px 0px ${colors.secondary}
+      `;
+            break;
         default:
             baseStyle.backgroundColor = colors.primary;
             baseStyle.color = '#ffffff';
