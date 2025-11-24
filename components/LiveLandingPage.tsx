@@ -1,5 +1,5 @@
 import React from 'react';
-import { FontPair, ColorPalette, ButtonStyle } from '../data/variations';
+import { FontPair, ColorPalette, ButtonStyle, ButtonAnimation } from '../data/variations';
 import { getButtonDynamicStyles } from '../utils/styleHelpers';
 import { getThemeColors } from '../utils/colorUtils';
 
@@ -7,12 +7,13 @@ interface LiveLandingPageProps {
     font: FontPair;
     palette: ColorPalette;
     buttonStyle: ButtonStyle;
+    buttonAnimation: ButtonAnimation;
     mission: string;
     mode: 'dark' | 'light';
     content: { headline: string, subheadline: string, cta: string, features: string[] } | null;
 }
 
-export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, mission, mode, content }) => {
+export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, buttonAnimation, mission, mode, content }) => {
     const colors = getThemeColors(palette, mode);
     const themePalette = { ...palette, colors };
 
@@ -20,6 +21,12 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
     const { className: btnClassPrimary, style: btnStylePrimary } = getButtonDynamicStyles(buttonStyle, themePalette, 'primary');
     const { className: btnClassSecondary, style: btnStyleSecondary } = getButtonDynamicStyles(buttonStyle, themePalette, 'secondary');
     const { className: btnClassHero, style: btnStyleHero } = getButtonDynamicStyles(buttonStyle, themePalette, 'hero');
+
+    // Common button classes for sizing and animation
+    const commonBtnClasses = `min-w-[160px] text-center justify-center ${buttonAnimation.class}`;
+    const heroBtnClasses = `${btnClassHero} ${commonBtnClasses}`;
+    const secondaryBtnClasses = `${btnClassSecondary} ${commonBtnClasses}`;
+    const primaryBtnClasses = `${btnClassPrimary} ${commonBtnClasses}`;
 
     const headline = content?.headline || "Build your dream with us.";
     const subheadline = content?.subheadline || mission || "The perfect solution for your business needs.";
@@ -66,15 +73,15 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
                     <p className="text-xl opacity-80 mb-10 max-w-xl leading-relaxed">
                         {subheadline}
                     </p>
-                    <div className="flex gap-4 items-center">
+                    <div className="flex gap-4 items-center flex-wrap">
                         <button
-                            className={btnClassHero}
+                            className={heroBtnClasses}
                             style={btnStyleHero}
                         >
                             {ctaText}
                         </button>
                         <button
-                            className={btnClassSecondary}
+                            className={secondaryBtnClasses}
                             style={btnStyleSecondary}
                         >
                             Learn More
@@ -149,7 +156,7 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
                     <p className="text-xl opacity-80">
                         Join thousands of satisfied customers today.
                     </p>
-                    <button className={btnClassPrimary} style={btnStylePrimary}>
+                    <button className={primaryBtnClasses} style={btnStylePrimary}>
                         Create Account Now
                     </button>
                 </div>

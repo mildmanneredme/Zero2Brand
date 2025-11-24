@@ -159,6 +159,12 @@ export const getButtonDynamicStyles = (
             baseStyle.border = `1px solid ${colors.primary}40`;
             baseStyle.boxShadow = `inset 0 10px 20px -10px ${colors.primary}`;
 
+            // If text is light (dark mode), ensure button stands out against dark bg
+            if (colors.text.startsWith('#f') || colors.text.startsWith('#e')) {
+                baseStyle.border = `1px solid ${colors.text}40`;
+                baseStyle.backgroundColor = '#1e293b'; // Slightly lighter dark
+            }
+
             if (variant === 'secondary') {
                 baseStyle.backgroundColor = 'transparent';
                 baseStyle.boxShadow = `inset 0 4px 10px -5px ${colors.primary}`; // Subtle inner glow

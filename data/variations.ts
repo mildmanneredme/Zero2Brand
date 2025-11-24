@@ -89,3 +89,18 @@ export const BUTTON_STYLES: ButtonStyle[] = [
     { name: "Neobrutalism", type: "brutalist", classes: "border-4 border-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-bold transition-all bg-white text-black", description: "Trendy bold style" },
     { name: "Spotlight", type: "spotlight", classes: "rounded-full px-8 py-3 transition-all relative overflow-hidden group", description: "Dark with top glow" }
 ];
+
+export interface ButtonAnimation {
+    name: string;
+    class: string;
+}
+
+export const BUTTON_ANIMATIONS: ButtonAnimation[] = [
+    { name: "None", class: "" },
+    { name: "Scale Up", class: "hover:scale-105 active:scale-95" },
+    { name: "Lift", class: "hover:-translate-y-1 hover:shadow-lg active:translate-y-0" },
+    { name: "Pulse", class: "hover:animate-pulse" },
+    { name: "Shake", class: "hover:animate-[wiggle_1s_ease-in-out_infinite]" }, // Requires custom keyframe or standard wiggle if available
+    { name: "Glow Pulse", class: "hover:shadow-[0_0_15px_currentColor]" },
+    { name: "Bounce", class: "hover:animate-bounce" }
+];

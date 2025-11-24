@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { FONTS, PALETTES, BUTTON_STYLES } from '../data/variations';
+import { FONTS, PALETTES, BUTTON_STYLES, BUTTON_ANIMATIONS } from '../data/variations';
 import { getButtonDynamicStyles } from '../utils/styleHelpers';
+import { getThemeColors } from '../utils/colorUtils';
 
 interface ConfiguratorProps {
     selectedFontIndex: number;
     selectedPaletteIndex: number;
     selectedButtonIndex: number;
-    onFontChange: (index: number) => void;
-    onPaletteChange: (index: number) => void;
-    onButtonChange: (index: number) => void;
-    onComplete: () => void;
+    selectedAnimationIndex: number;
+    onFontSelect: (index: number) => void;
+    onPaletteSelect: (index: number) => void;
+    onButtonSelect: (index: number) => void;
+    onAnimationSelect: (index: number) => void;
     mode: 'dark' | 'light';
     onModeChange: (mode: 'dark' | 'light') => void;
 }
@@ -18,60 +20,59 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
     selectedFontIndex,
     selectedPaletteIndex,
     selectedButtonIndex,
-    onFontChange,
-    onPaletteChange,
-    onButtonChange,
-    onComplete,
+    selectedAnimationIndex,
+    onFontSelect,
+    onPaletteSelect,
+    onButtonSelect,
+    onAnimationSelect,
     mode,
     onModeChange
 }) => {
-    const [activeTab, setActiveTab] = useState<'fonts' | 'colors' | 'buttons'>('fonts');
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [activeTab, setActiveTab] = useState<'fonts' | 'colors' | 'buttons' | 'animations'>('fonts');
+    const [isOpen, setIsOpen] = useState(true);
 
-    if (isCollapsed) {
+    if (!isOpen) {
         return (
             <button
-                onClick={() => setIsCollapsed(false)}
-                className="fixed bottom-8 right-8 bg-indigo-600 text-white p-4 rounded-full shadow-2xl hover:bg-indigo-500 transition-all z-50"
+                onClick={() => setIsOpen(true)}
+                className="fixed bottom-6 right-6 bg-black text-white p-4 rounded-full shadow-xl z-50 hover:scale-110 transition-transform"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                🎨
             </button>
         );
     }
 
     return (
-        <div className="fixed bottom-8 right-8 w-96 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] z-50 animate-fade-in">
+        <div className="fixed bottom-6 right-6 w-96 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 z-50 flex flex-col max-h-[80vh] overflow-hidden transition-all animate-in slide-in-from-bottom-10 fade-in duration-300">
             {/* Header */}
-            <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span>🎨</span> Brand Builder
-                </h2>
-                <div className="flex items-center gap-2">
+            <div className="p-4 border-b flex justify-between items-center bg-white/50">
+                <h3 className="font-bold text-gray-800">Style Configurator</h3>
+                <div className="flex gap-2">
                     <button
-                        onClick={() => onModeChange(mode === 'dark' ? 'light' : 'dark')}
-                        className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
-                        title={`Switch to ${mode === 'dark' ? 'Light' : 'Dark'} Mode`}
+                        onClick={() => onModeChange(mode === 'light' ? 'dark' : 'light')}
+                        className="p-2 rounded-lg hover:bg-black/5 transition-colors"
+                        title="Toggle Dark/Light Mode"
                     >
-                        {mode === 'dark' ? '☀️' : '🌙'}
+                        {mode === 'light' ? '🌙' : '☀️'}
                     </button>
                     <button
-                        onClick={() => setIsCollapsed(true)}
-                        className="text-slate-400 hover:text-white"
+                        onClick={() => setIsOpen(false)}
+                        className="p-2 rounded-lg hover:bg-black/5 transition-colors text-gray-500"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
+                        ✕
                     </button>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-slate-700">
-                {(['fonts', 'colors', 'buttons'] as const).map((tab) => (
+            <div className="flex p-2 gap-1 bg-gray-50/50">
+                {(['fonts', 'colors', 'buttons', 'animations'] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 py-3 text-sm font-medium capitalize transition-colors ${activeTab === tab
-                            ? 'text-indigo-400 border-b-2 border-indigo-400 bg-slate-800/50'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                        className={`flex-1 py-2 text-sm font-medium rounded-lg capitalize transition-all ${activeTab === tab
+                            ? 'bg-white shadow-sm text-black'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-black/5'
                             }`}
                     >
                         {tab}
@@ -80,88 +81,81 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                {activeTab === 'fonts' && FONTS.map((font, index) => (
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {activeTab === 'fonts' && FONTS.map((font, i) => (
                     <button
-                        key={index}
-                        onClick={() => onFontChange(index)}
-                        className={`w-full text-left p-3 rounded-lg border transition-all ${selectedFontIndex === index
-                            ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
-                            : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                        key={i}
+                        onClick={() => onFontSelect(i)}
+                        className={`w-full text-left p-3 rounded-xl transition-all border-2 ${selectedFontIndex === i ? 'border-black bg-gray-50' : 'border-transparent hover:bg-gray-50'
                             }`}
                     >
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="text-white font-medium">{font.name}</span>
-                            {selectedFontIndex === index && <span className="text-indigo-400 text-xs">Active</span>}
-                        </div>
-                        <div className="text-sm text-slate-300 mb-2" style={{ fontFamily: font.headerFont }}>
-                            Header: {font.headerFont}
-                        </div>
-                        <div className="text-xs text-slate-500" style={{ fontFamily: font.bodyFont }}>
-                            Body: {font.bodyFont}
+                        <div className="text-lg" style={{ fontFamily: font.headerFont }}>{font.name}</div>
+                        <div className="text-sm text-gray-500" style={{ fontFamily: font.bodyFont }}>
+                            {font.description}
                         </div>
                     </button>
                 ))}
 
-                {activeTab === 'colors' && PALETTES.map((palette, index) => (
+                {activeTab === 'colors' && PALETTES.map((palette, i) => (
                     <button
-                        key={index}
-                        onClick={() => onPaletteChange(index)}
-                        className={`w-full text-left p-3 rounded-lg border transition-all ${selectedPaletteIndex === index
-                            ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
-                            : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                        key={i}
+                        onClick={() => onPaletteSelect(i)}
+                        className={`w-full text-left p-3 rounded-xl transition-all border-2 flex items-center gap-4 ${selectedPaletteIndex === i ? 'border-black bg-gray-50' : 'border-transparent hover:bg-gray-50'
                             }`}
                     >
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-white font-medium">{palette.name}</span>
-                            {selectedPaletteIndex === index && <span className="text-indigo-400 text-xs">Active</span>}
+                        <div className="flex -space-x-2">
+                            <div className="w-8 h-8 rounded-full border-2 border-white" style={{ backgroundColor: palette.colors.primary }}></div>
+                            <div className="w-8 h-8 rounded-full border-2 border-white" style={{ backgroundColor: palette.colors.secondary }}></div>
+                            <div className="w-8 h-8 rounded-full border-2 border-white" style={{ backgroundColor: palette.colors.accent }}></div>
                         </div>
-                        <div className="flex gap-2">
-                            {Object.values(palette.colors).map((color, i) => (
-                                <div
-                                    key={i}
-                                    className="w-6 h-6 rounded-full ring-1 ring-white/10"
-                                    style={{ backgroundColor: color }}
-                                />
-                            ))}
+                        <div>
+                            <div className="font-medium text-gray-900">{palette.name}</div>
+                            <div className="text-xs text-gray-500">Primary • Secondary • Accent</div>
                         </div>
                     </button>
                 ))}
 
-                {activeTab === 'buttons' && BUTTON_STYLES.map((style, index) => {
-                    const { className: btnClass, style: btnStyle } = getButtonDynamicStyles(style, PALETTES[selectedPaletteIndex]);
+                {activeTab === 'buttons' && BUTTON_STYLES.map((style, i) => {
+                    // Preview using the currently selected palette and mode
+                    const palette = PALETTES[selectedPaletteIndex];
+                    const colors = getThemeColors(palette, mode);
+                    const themePalette = { ...palette, colors };
+                    const { className, style: btnStyle } = getButtonDynamicStyles(style, themePalette);
 
                     return (
                         <button
-                            key={index}
-                            onClick={() => onButtonChange(index)}
-                            className={`w-full text-left p-4 rounded-lg border transition-all ${selectedButtonIndex === index
-                                ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
-                                : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                            key={i}
+                            onClick={() => onButtonSelect(i)}
+                            className={`w-full text-left p-4 rounded-xl transition-all border-2 group ${selectedButtonIndex === i ? 'border-black bg-gray-50' : 'border-transparent hover:bg-gray-50'
                                 }`}
                         >
-                            <div className="flex justify-between items-center mb-4">
-                                <span className="text-white font-medium">{style.name}</span>
-                                {selectedButtonIndex === index && <span className="text-indigo-400 text-xs">Active</span>}
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-medium text-gray-900">{style.name}</span>
                             </div>
-                            <div className="flex justify-center bg-slate-900/50 p-4 rounded border border-slate-700/50">
-                                <div className={btnClass} style={btnStyle}>
-                                    Button Preview
+                            <div className="flex justify-center py-4 bg-gray-100/50 rounded-lg overflow-hidden">
+                                <div className={className} style={{ ...btnStyle, transform: 'scale(0.8)' }}>
+                                    Button
                                 </div>
                             </div>
                         </button>
                     );
                 })}
-            </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-slate-700 bg-slate-900">
-                <button
-                    onClick={onComplete}
-                    className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold rounded-lg shadow-lg transition-all"
-                >
-                    Finalize & Generate Assets
-                </button>
+                {activeTab === 'animations' && BUTTON_ANIMATIONS.map((anim, i) => (
+                    <button
+                        key={i}
+                        onClick={() => onAnimationSelect(i)}
+                        className={`w-full text-left p-3 rounded-xl transition-all border-2 ${selectedAnimationIndex === i ? 'border-black bg-gray-50' : 'border-transparent hover:bg-gray-50'
+                            }`}
+                    >
+                        <div className="flex justify-between items-center">
+                            <span className="font-medium text-gray-900">{anim.name}</span>
+                            <div className={`px-4 py-2 bg-black text-white rounded-lg text-xs ${anim.class}`}>
+                                Hover Me
+                            </div>
+                        </div>
+                    </button>
+                ))}
             </div>
         </div>
     );

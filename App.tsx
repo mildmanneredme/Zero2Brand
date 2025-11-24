@@ -8,7 +8,7 @@ import { StyleGuide } from './components/StyleGuide';
 import { LiveLandingPage } from './components/LiveLandingPage';
 import { Configurator } from './components/Configurator';
 import { FontLoader } from './components/FontLoader';
-import { FONTS, PALETTES, BUTTON_STYLES } from './data/variations';
+import { FONTS, PALETTES, BUTTON_STYLES, BUTTON_ANIMATIONS } from './data/variations';
 import { generateBrandConcepts, generateBrandImage, generateSiteContent } from './services/gemini';
 
 enum AppState {
@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [selectedFontIndex, setSelectedFontIndex] = useState(0);
   const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
+  const [selectedAnimationIndex, setSelectedAnimationIndex] = useState(1); // Default to Scale Up
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
   const [siteContent, setSiteContent] = useState<{ headline: string, subheadline: string, cta: string, features: string[] } | null>(null);
 
@@ -61,18 +62,26 @@ const App: React.FC = () => {
 
   const handleStartBuilder = async () => {
     if (!mission.trim()) return;
+
     // Randomize initial state for variety
     setSelectedFontIndex(Math.floor(Math.random() * FONTS.length));
     setSelectedPaletteIndex(Math.floor(Math.random() * PALETTES.length));
     setSelectedButtonIndex(Math.floor(Math.random() * BUTTON_STYLES.length));
-    setState(AppState.LiveBuilder);
 
-    // Generate content in background
+    // Show loading state
+    setState(AppState.GeneratingConcepts);
+
     try {
+      // Generate content
       const content = await generateSiteContent(mission);
       setSiteContent(content);
+
+      // Once content is ready, switch to builder
+      setState(AppState.LiveBuilder);
     } catch (e) {
       console.error("Failed to generate content", e);
+      // Fallback to builder even if generation fails (will use default text)
+      setState(AppState.LiveBuilder);
     }
   };
 
@@ -169,6 +178,7 @@ const App: React.FC = () => {
             font={FONTS[selectedFontIndex]}
             palette={PALETTES[selectedPaletteIndex]}
             buttonStyle={BUTTON_STYLES[selectedButtonIndex]}
+            buttonAnimation={BUTTON_ANIMATIONS[selectedAnimationIndex]}
             mission={mission}
             mode={themeMode}
             content={siteContent}
@@ -178,10 +188,11 @@ const App: React.FC = () => {
           selectedFontIndex={selectedFontIndex}
           selectedPaletteIndex={selectedPaletteIndex}
           selectedButtonIndex={selectedButtonIndex}
-          onFontChange={setSelectedFontIndex}
-          onPaletteChange={setSelectedPaletteIndex}
-          onButtonChange={setSelectedButtonIndex}
-          onComplete={handleBuilderComplete}
+          selectedAnimationIndex={selectedAnimationIndex}
+          onFontSelect={setSelectedFontIndex}
+          onPaletteSelect={setSelectedPaletteIndex}
+          onButtonSelect={setSelectedButtonIndex}
+          onAnimationSelect={setSelectedAnimationIndex}
           mode={themeMode}
           onModeChange={setThemeMode}
         />
