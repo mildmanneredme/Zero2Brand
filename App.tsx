@@ -5,13 +5,15 @@ import { ConceptCard } from './components/ConceptCard';
 import { LogoGenerator } from './components/LogoGenerator';
 import { BrandDashboard } from './components/BrandDashboard';
 import { ChatWidget } from './components/ChatWidget';
+import { StyleGuide } from './components/StyleGuide';
 
 enum AppState {
   Input,
   GeneratingConcepts,
   SelectConcept,
   GenerateAssets,
-  Dashboard
+  Dashboard,
+  Preview
 }
 
 const App: React.FC = () => {
@@ -19,7 +21,7 @@ const App: React.FC = () => {
   const [mission, setMission] = useState('');
   const [concepts, setConcepts] = useState<BrandConcept[]>([]);
   const [selectedConcept, setSelectedConcept] = useState<BrandConcept | null>(null);
-  
+
   // Assets
   const [primaryLogo, setPrimaryLogo] = useState<string | undefined>(undefined);
   const [primaryLogoSize, setPrimaryLogoSize] = useState<ImageSize | undefined>(undefined);
@@ -48,7 +50,7 @@ const App: React.FC = () => {
       await window.aistudio.openSelectKey();
       // As per instructions, assume success immediately after triggering openSelectKey.
       // Do not check return value as it is void.
-      setHasApiKey(true); 
+      setHasApiKey(true);
     }
   };
 
@@ -90,18 +92,32 @@ const App: React.FC = () => {
         <div className="max-w-md text-center space-y-6">
           <h1 className="text-3xl font-bold text-white">Zero2Brand</h1>
           <p className="text-slate-400">To generate high-quality assets using Gemini's advanced models (Image 3 Pro & Veo), please select a paid API Key.</p>
-          <button 
+          <button
             onClick={handleApiKeySelect}
             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold transition-colors"
           >
             Select API Key
           </button>
+
+          <div className="pt-4 border-t border-slate-800">
+            <button
+              onClick={() => setState(AppState.Preview)}
+              className="text-sm text-slate-500 hover:text-indigo-400 transition-colors"
+            >
+              View Style Guide Preview
+            </button>
+          </div>
+
           <div className="text-xs text-slate-500">
             <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="underline hover:text-indigo-400">Billing Documentation</a>
           </div>
         </div>
       </div>
     );
+  }
+
+  if (state === AppState.Preview) {
+    return <StyleGuide onBack={() => setState(AppState.Input)} />;
   }
 
   return (
@@ -114,17 +130,23 @@ const App: React.FC = () => {
             <span className="text-xl font-bold text-white">Zero2Brand</span>
           </div>
           {state !== AppState.Input && (
-             <div className="flex gap-2">
-                 {[AppState.SelectConcept, AppState.GenerateAssets, AppState.Dashboard].includes(state) && 
-                    <div className="text-xs font-mono text-slate-500 px-2 py-1 bg-slate-800 rounded">gemini-3-pro</div>
-                 }
-             </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setState(AppState.Preview)}
+                className="text-xs font-medium text-slate-400 hover:text-white px-2 py-1"
+              >
+                Style Guide
+              </button>
+              {[AppState.SelectConcept, AppState.GenerateAssets, AppState.Dashboard].includes(state) &&
+                <div className="text-xs font-mono text-slate-500 px-2 py-1 bg-slate-800 rounded">gemini-3-pro</div>
+              }
+            </div>
           )}
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
+
         {/* Step 1: Input */}
         {state === AppState.Input && (
           <div className="max-w-2xl mx-auto text-center space-y-8 animate-fade-in pt-12">
@@ -137,7 +159,7 @@ const App: React.FC = () => {
             <p className="text-xl text-slate-400">
               Describe your company mission, values, and vibe. We'll generate a complete Brand Bible with logos, colors, and typography.
             </p>
-            
+
             <div className="bg-slate-800 p-2 rounded-2xl shadow-xl border border-slate-700">
               <textarea
                 value={mission}
@@ -145,14 +167,20 @@ const App: React.FC = () => {
                 placeholder="e.g., A sustainable coffee roastery based in Seattle that focuses on ethical sourcing and cozy, minimalist aesthetics..."
                 className="w-full h-32 bg-slate-900 border-none rounded-xl p-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 resize-none"
               />
-              <div className="flex justify-end p-2">
+              <div className="flex justify-between items-center p-2">
+                <button
+                  onClick={() => setState(AppState.Preview)}
+                  className="text-sm text-slate-500 hover:text-indigo-400 transition-colors"
+                >
+                  View Style Guide
+                </button>
                 <button
                   onClick={handleGenerateConcepts}
                   disabled={!mission.trim()}
                   className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
                 >
-                   Generate Concepts
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+                  Generate Concepts
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
                 </button>
               </div>
             </div>
@@ -163,12 +191,12 @@ const App: React.FC = () => {
         {state === AppState.GeneratingConcepts && (
           <div className="flex flex-col items-center justify-center h-[60vh] space-y-6">
             <div className="relative w-24 h-24">
-               <div className="absolute inset-0 border-4 border-indigo-500/30 rounded-full"></div>
-               <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="absolute inset-0 border-4 border-indigo-500/30 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-white">Dreaming up ideas...</h2>
-                <p className="text-slate-400">Gemini 3 Pro is analyzing your mission.</p>
+              <h2 className="text-2xl font-bold text-white">Dreaming up ideas...</h2>
+              <p className="text-slate-400">Gemini 3 Pro is analyzing your mission.</p>
             </div>
           </div>
         )}
@@ -176,78 +204,78 @@ const App: React.FC = () => {
         {/* Step 2: Select Concept */}
         {state === AppState.SelectConcept && (
           <div className="space-y-8 animate-fade-in">
-             <div className="text-center">
-               <h2 className="text-3xl font-bold text-white mb-2">Choose a Direction</h2>
-               <p className="text-slate-400">Select the vibe that best matches your vision.</p>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               {concepts?.map((concept) => (
-                 <ConceptCard 
-                   key={concept.id} 
-                   concept={concept} 
-                   onSelect={handleSelectConcept}
-                   isSelected={false}
-                 />
-               ))}
-             </div>
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-white mb-2">Choose a Direction</h2>
+              <p className="text-slate-400">Select the vibe that best matches your vision.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {concepts?.map((concept) => (
+                <ConceptCard
+                  key={concept.id}
+                  concept={concept}
+                  onSelect={handleSelectConcept}
+                  isSelected={false}
+                />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Step 3: Generate Assets */}
         {state === AppState.GenerateAssets && selectedConcept && (
           <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-             <div className="text-center mb-12">
-               <h2 className="text-3xl font-bold text-white mb-2">Bring it to life</h2>
-               <p className="text-slate-400">Generate your visual assets using high-definition AI models.</p>
-             </div>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-2">Bring it to life</h2>
+              <p className="text-slate-400">Generate your visual assets using high-definition AI models.</p>
+            </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Primary Logo Gen */}
-                <div className="space-y-4">
-                  <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
-                    <p className="text-xs text-slate-500 uppercase font-bold mb-2">Prompt Strategy</p>
-                    <p className="text-sm text-slate-300 italic">{selectedConcept.logoPrompt}</p>
-                  </div>
-                  <LogoGenerator 
-                    type="Primary Logo" 
-                    prompt={selectedConcept.logoPrompt} 
-                    onImageGenerated={(url, size) => {
-                      setPrimaryLogo(url);
-                      setPrimaryLogoSize(size);
-                    }}
-                  />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Primary Logo Gen */}
+              <div className="space-y-4">
+                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
+                  <p className="text-xs text-slate-500 uppercase font-bold mb-2">Prompt Strategy</p>
+                  <p className="text-sm text-slate-300 italic">{selectedConcept.logoPrompt}</p>
                 </div>
+                <LogoGenerator
+                  type="Primary Logo"
+                  prompt={selectedConcept.logoPrompt}
+                  onImageGenerated={(url, size) => {
+                    setPrimaryLogo(url);
+                    setPrimaryLogoSize(size);
+                  }}
+                />
+              </div>
 
-                {/* Secondary Mark Gen */}
-                <div className="space-y-4">
-                   <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
-                    <p className="text-xs text-slate-500 uppercase font-bold mb-2">Prompt Strategy</p>
-                    <p className="text-sm text-slate-300 italic">{selectedConcept.secondaryMarkPrompt}</p>
-                  </div>
-                  <LogoGenerator 
-                    type="Secondary Mark" 
-                    prompt={selectedConcept.secondaryMarkPrompt} 
-                    onImageGenerated={(url) => setSecondaryMark(url)}
-                  />
+              {/* Secondary Mark Gen */}
+              <div className="space-y-4">
+                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
+                  <p className="text-xs text-slate-500 uppercase font-bold mb-2">Prompt Strategy</p>
+                  <p className="text-sm text-slate-300 italic">{selectedConcept.secondaryMarkPrompt}</p>
                 </div>
-             </div>
+                <LogoGenerator
+                  type="Secondary Mark"
+                  prompt={selectedConcept.secondaryMarkPrompt}
+                  onImageGenerated={(url) => setSecondaryMark(url)}
+                />
+              </div>
+            </div>
 
-             <div className="flex justify-center pt-8">
-               <button
-                 onClick={handleAssetsComplete}
-                 disabled={!primaryLogo}
-                 className="px-8 py-3 bg-white text-slate-900 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold rounded-lg transition-colors shadow-lg shadow-white/10"
-               >
-                 {primaryLogo ? "Finalize Brand Bible" : "Generate Primary Logo to Continue"}
-               </button>
-             </div>
+            <div className="flex justify-center pt-8">
+              <button
+                onClick={handleAssetsComplete}
+                disabled={!primaryLogo}
+                className="px-8 py-3 bg-white text-slate-900 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold rounded-lg transition-colors shadow-lg shadow-white/10"
+              >
+                {primaryLogo ? "Finalize Brand Bible" : "Generate Primary Logo to Continue"}
+              </button>
+            </div>
           </div>
         )}
 
         {/* Step 4: Dashboard */}
         {state === AppState.Dashboard && selectedConcept && (
-          <BrandDashboard 
+          <BrandDashboard
             concept={selectedConcept}
             logoUrl={primaryLogo}
             logoSize={primaryLogoSize}
@@ -258,8 +286,8 @@ const App: React.FC = () => {
       </main>
 
       {/* Floating Chat Bot - Always available if we have concept context or just generally */}
-      <ChatWidget 
-        context={selectedConcept ? JSON.stringify(selectedConcept) : mission || "No brand defined yet."} 
+      <ChatWidget
+        context={selectedConcept ? JSON.stringify(selectedConcept) : mission || "No brand defined yet."}
       />
     </div>
   );

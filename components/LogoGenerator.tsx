@@ -18,9 +18,53 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
     setLoading(true);
     setError(null);
     try {
-      const url = await generateBrandImage(prompt, selectedSize);
-      setGeneratedUrl(url);
-      onImageGenerated(url, selectedSize);
+      const rawUrl = await generateBrandImage(prompt, selectedSize);
+
+      // Apply Watermark
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = rawUrl;
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+
+      if (ctx) {
+        // Draw original image
+        ctx.drawImage(img, 0, 0);
+
+        // Configure watermark style
+        const fontSize = Math.floor(img.width * 0.05); // 5% of image width
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+
+        // Add shadow for better visibility on light backgrounds
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+
+        // Draw text
+        const padding = Math.floor(img.width * 0.02);
+        ctx.fillText('Zero2Brand', img.width - padding, img.height - padding);
+
+        const watermarkedUrl = canvas.toDataURL('image/png');
+        setGeneratedUrl(watermarkedUrl);
+        onImageGenerated(watermarkedUrl, selectedSize);
+      } else {
+        // Fallback if canvas fails
+        setGeneratedUrl(rawUrl);
+        onImageGenerated(rawUrl, selectedSize);
+      }
+
     } catch (e) {
       setError("Failed to generate image. Please try again. Ensure you have a valid API Key selected.");
       console.error(e);
@@ -33,7 +77,7 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
     <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
       <h3 className="text-lg font-semibold text-white mb-2">Generate {type}</h3>
       <p className="text-slate-400 text-sm mb-4">Using model: <span className="font-mono text-xs text-emerald-400">gemini-3-pro-image-preview</span></p>
-      
+
       <div className="mb-6 space-y-2">
         <label className="text-sm text-slate-300 block">Select Resolution</label>
         <div className="flex gap-2">
@@ -41,11 +85,10 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
             <button
               key={size}
               onClick={() => setSelectedSize(size)}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                selectedSize === size 
-                  ? 'bg-indigo-600 text-white border border-indigo-500' 
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${selectedSize === size
+                  ? 'bg-indigo-600 text-white border border-indigo-500'
                   : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'
-              }`}
+                }`}
             >
               {size}
             </button>
@@ -72,12 +115,12 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
       {generatedUrl && (
         <div className="space-y-4">
           <div className="relative aspect-square w-full bg-black/20 rounded-lg overflow-hidden border border-slate-600 group">
-             <img src={generatedUrl} alt="Generated Asset" className="w-full h-full object-contain" />
-             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <a href={generatedUrl} download={`${type.replace(' ','_')}.png`} className="text-white bg-slate-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-700">
-                  Download
-                </a>
-             </div>
+            <img src={generatedUrl} alt="Generated Asset" className="w-full h-full object-contain" />
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <a href={generatedUrl} download={`${type.replace(' ', '_')}.png`} className="text-white bg-slate-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-700">
+                Download
+              </a>
+            </div>
           </div>
           <button
             onClick={handleGenerate}
@@ -87,7 +130,7 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
           </button>
         </div>
       )}
-      
+
       {error && (
         <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg mt-4">
           {error}
