@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrandConcept, ImageSize } from './types';
 import { LogoGenerator } from './components/LogoGenerator';
@@ -6,7 +7,9 @@ import { ChatWidget } from './components/ChatWidget';
 import { StyleGuide } from './components/StyleGuide';
 import { LiveLandingPage } from './components/LiveLandingPage';
 import { Configurator } from './components/Configurator';
+import { FontLoader } from './components/FontLoader';
 import { FONTS, PALETTES, BUTTON_STYLES } from './data/variations';
+import { generateBrandConcepts, generateBrandImage, generateSiteContent } from './services/gemini';
 
 enum AppState {
   Input,
@@ -25,6 +28,7 @@ const App: React.FC = () => {
   const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
+  const [siteContent, setSiteContent] = useState<{ headline: string, subheadline: string, cta: string, features: string[] } | null>(null);
 
   // Derived Concept (constructed from live builder state)
   const [finalConcept, setFinalConcept] = useState<BrandConcept | null>(null);
@@ -55,13 +59,21 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStartBuilder = () => {
+  const handleStartBuilder = async () => {
     if (!mission.trim()) return;
     // Randomize initial state for variety
     setSelectedFontIndex(Math.floor(Math.random() * FONTS.length));
     setSelectedPaletteIndex(Math.floor(Math.random() * PALETTES.length));
     setSelectedButtonIndex(Math.floor(Math.random() * BUTTON_STYLES.length));
     setState(AppState.LiveBuilder);
+
+    // Generate content in background
+    try {
+      const content = await generateSiteContent(mission);
+      setSiteContent(content);
+    } catch (e) {
+      console.error("Failed to generate content", e);
+    }
   };
 
   const handleBuilderComplete = () => {
@@ -71,8 +83,8 @@ const App: React.FC = () => {
     const button = BUTTON_STYLES[selectedButtonIndex];
 
     const concept: BrandConcept = {
-      id: `custom-${Date.now()}`,
-      name: `${palette.name} ${font.name}`,
+      id: `custom - ${Date.now()} `,
+      name: `${palette.name} ${font.name} `,
       description: `A custom brand identity built for: "${mission}"`,
       colors: [
         { hex: palette.colors.primary, name: "Primary", usage: "Main Brand Color" },
@@ -92,9 +104,9 @@ const App: React.FC = () => {
         borderRadius: "custom",
         shadow: "custom"
       },
-      logoPrompt: `A minimal, modern logo for a brand with mission: "${mission}". Primary color: ${palette.colors.primary}. Style: ${font.name}. Vector graphics, white background.`,
-      secondaryMarkPrompt: `A simple icon symbol for a brand with mission: "${mission}". Color: ${palette.colors.accent}. Style: Flat, minimal.`,
-      vibeCoderPrompt: `Reskin the app using ${font.headerFont} for headers and ${font.bodyFont} for body. Primary color is ${palette.colors.primary}. Buttons should be ${button.description}.`
+      logoPrompt: `A minimal, modern logo for a brand with mission: "${mission}".Primary color: ${palette.colors.primary}.Style: ${font.name}. Vector graphics, white background.`,
+      secondaryMarkPrompt: `A simple icon symbol for a brand with mission: "${mission}".Color: ${palette.colors.accent}.Style: Flat, minimal.`,
+      vibeCoderPrompt: `Reskin the app using ${font.headerFont} for headers and ${font.bodyFont} for body.Primary color is ${palette.colors.primary}. Buttons should be ${button.description}.`
     };
 
     setFinalConcept(concept);
@@ -151,13 +163,17 @@ const App: React.FC = () => {
   if (state === AppState.LiveBuilder) {
     return (
       <div className="relative">
-        <LiveLandingPage
-          font={FONTS[selectedFontIndex]}
-          palette={PALETTES[selectedPaletteIndex]}
-          buttonStyle={BUTTON_STYLES[selectedButtonIndex]}
-          mission={mission}
-          mode={themeMode}
-        />
+        <>
+          <FontLoader font={FONTS[selectedFontIndex]} />
+          <LiveLandingPage
+            font={FONTS[selectedFontIndex]}
+            palette={PALETTES[selectedPaletteIndex]}
+            buttonStyle={BUTTON_STYLES[selectedButtonIndex]}
+            mission={mission}
+            mode={themeMode}
+            content={siteContent}
+          />
+        </>
         <Configurator
           selectedFontIndex={selectedFontIndex}
           selectedPaletteIndex={selectedPaletteIndex}

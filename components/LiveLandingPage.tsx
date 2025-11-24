@@ -9,17 +9,26 @@ interface LiveLandingPageProps {
     buttonStyle: ButtonStyle;
     mission: string;
     mode: 'dark' | 'light';
+    content: { headline: string, subheadline: string, cta: string, features: string[] } | null;
 }
 
-export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, mission, mode }) => {
+export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, mission, mode, content }) => {
     const colors = getThemeColors(palette, mode);
-    // We need to pass the *adjusted* palette to the button helper so buttons match the theme
     const themePalette = { ...palette, colors };
-    const { className: btnClass, style: btnStyle } = getButtonDynamicStyles(buttonStyle, themePalette);
+
+    // Get styles for different variants
+    const { className: btnClassPrimary, style: btnStylePrimary } = getButtonDynamicStyles(buttonStyle, themePalette, 'primary');
+    const { className: btnClassSecondary, style: btnStyleSecondary } = getButtonDynamicStyles(buttonStyle, themePalette, 'secondary');
+    const { className: btnClassHero, style: btnStyleHero } = getButtonDynamicStyles(buttonStyle, themePalette, 'hero');
+
+    const headline = content?.headline || "Build your dream with us.";
+    const subheadline = content?.subheadline || mission || "The perfect solution for your business needs.";
+    const ctaText = content?.cta || "Get Started";
+    const features = content?.features || ["Fast Performance", "Secure Platform", "24/7 Support"];
 
     return (
         <div
-            className="min-h-screen transition-colors duration-500"
+            className="min-h-screen w-full transition-colors duration-500 flex flex-col"
             style={{
                 backgroundColor: colors.background,
                 color: colors.text,
@@ -27,67 +36,25 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
             }}
         >
             {/* Navbar */}
-            <nav className="border-b transition-colors duration-500" style={{ borderColor: `${colors.text}20` }}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div
-                            className="w-8 h-8 rounded-lg"
-                            style={{ backgroundColor: colors.primary }}
-                        ></div>
-                        <span
-                            className="text-xl font-bold"
-                            style={{ fontFamily: font.headerFont }}
-                        >
-                            BrandName
-                        </span>
-                    </div>
-                    <div className="hidden md:flex items-center gap-8">
-                        <a href="#" className="hover:opacity-70 transition-opacity">Features</a>
-                        <a href="#" className="hover:opacity-70 transition-opacity">Pricing</a>
-                        <a href="#" className="hover:opacity-70 transition-opacity">About</a>
-                        <button className={btnClass} style={btnStyle}>
-                            Get Started
-                        </button>
-                    </div>
+            <nav className="flex justify-between items-center px-12 py-6">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: colors.primary }}></div>
+                    <span className="font-bold text-xl tracking-tight" style={{ fontFamily: font.headerFont }}>BrandName</span>
+                </div>
+                <div className="flex gap-8 text-sm font-medium opacity-80">
+                    <a href="#" className="hover:opacity-100 transition-opacity">Features</a>
+                    <a href="#" className="hover:opacity-100 transition-opacity">Pricing</a>
+                    <a href="#" className="hover:opacity-100 transition-opacity">About</a>
+                    <button
+                        className={btnClassSecondary}
+                        style={{ ...btnStyleSecondary, padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}
+                    >
+                        Login
+                    </button>
                 </div>
             </nav>
 
             {/* Hero Section */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-8">
-                        <h1
-                            className="text-5xl lg:text-7xl font-bold leading-tight"
-                            style={{ fontFamily: font.headerFont }}
-                        >
-                            Build your <span style={{ color: colors.primary }}>dream</span> with us.
-                        </h1>
-                        <p className="text-xl opacity-80 max-w-lg">
-                            {mission || "We help companies scale their vision with cutting-edge tools and design systems that work for everyone."}
-                        </p>
-                        <div className="flex gap-4">
-                            <button className={btnClass} style={btnStyle}>
-                                Start Free Trial
-                            </button>
-                            <button
-                                className="px-6 py-2 rounded-lg border transition-colors hover:bg-black/5"
-                                style={{ borderColor: colors.text, color: colors.text }}
-                            >
-                                Learn More
-                            </button>
-                        </div>
-                    </div>
-                    <div
-                        className="aspect-square rounded-2xl shadow-2xl flex items-center justify-center relative overflow-hidden"
-                        style={{ backgroundColor: colors.secondary }}
-                    >
-                        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                        <div className="text-9xl opacity-50 select-none" style={{ color: colors.background }}>
-                            🚀
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {/* Features Grid */}
             <div className="py-24" style={{ backgroundColor: `${colors.primary}10` }}>

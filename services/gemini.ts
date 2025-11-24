@@ -72,3 +72,47 @@ export const getChatResponse = async (history: { role: string, parts: { text: st
   const result = await chat.sendMessage({ message });
   return result.text;
 };
+
+export const generateSiteContent = async (mission: string): Promise<{ headline: string, subheadline: string, cta: string, features: string[] }> => {
+  const ai = await getAIClient();
+
+  const prompt = `
+    You are a copywriter for a landing page.
+    Mission: "${mission}"
+    
+    Generate a catchy Headline, a persuasive Subheadline, a Call to Action (CTA) button text, and 3 short feature titles.
+    Return ONLY valid JSON in this format:
+    {
+      "headline": "...",
+      "subheadline": "...",
+      "cta": "...",
+      "features": ["...", "...", "..."]
+    }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: {
+        parts: [{ text: prompt }]
+      },
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const text = response.response.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("No content generated");
+
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("Gemini Content Gen Error:", e);
+    // Fallback content
+    return {
+      headline: "Build Your Dream",
+      subheadline: "The perfect solution for your business needs.",
+      cta: "Get Started",
+      features: ["Fast Performance", "Secure", "Easy to Use"]
+    };
+  }
+};

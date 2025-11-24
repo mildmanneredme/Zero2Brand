@@ -85,9 +85,7 @@ export const BUTTON_STYLES: ButtonStyle[] = [
     { name: "Ghost", type: "ghost", classes: "bg-transparent rounded-full px-6 py-2 transition-all hover:bg-opacity-10", description: "Semi-transparent" },
     { name: "Anime Speed", type: "anime", classes: "text-white -skew-x-12 border-l-4 border-r-4 px-8 py-2 hover:skew-x-0 hover:scale-110 transition-all duration-300 uppercase font-black tracking-wider", description: "High energy skew" },
     { name: "Cyberpunk Glitch", type: "cyberpunk", classes: "text-white rounded-none border border-current px-6 py-2 font-mono uppercase tracking-widest hover:shadow-[0_0_10px_currentColor] transition-all relative overflow-hidden group", description: "Tech glitch effect" },
-    { name: "Vinyl Record", type: "vinyl", classes: "text-transparent rounded-full w-12 h-12 flex items-center justify-center hover:animate-spin transition-all shadow-xl border-4 border-gray-900 relative overflow-hidden", description: "Spinning record" },
     { name: "Retro Pixel", type: "pixel", classes: "text-white px-6 py-2 font-mono text-xs uppercase tracking-widest hover:translate-y-1 transition-none", description: "8-bit arcade style" },
     { name: "Neobrutalism", type: "brutalist", classes: "border-4 border-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-bold transition-all bg-white text-black", description: "Trendy bold style" },
-    { name: "Circle Icon", type: "solid", classes: "text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:scale-110 transition-all", description: "Icon only (circle)" },
-    { name: "Floating Fab", type: "solid", classes: "text-white rounded-full shadow-xl hover:scale-110 hover:shadow-2xl transition-all px-6 py-3", description: "Floating action" }
+    { name: "Spotlight", type: "spotlight", classes: "rounded-full px-8 py-3 transition-all relative overflow-hidden group", description: "Dark with top glow" }
 ];
