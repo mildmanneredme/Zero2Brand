@@ -55,6 +55,44 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
             </nav>
 
             {/* Hero Section */}
+            <main className="flex-1 flex flex-col justify-center px-12 lg:px-24 relative overflow-hidden py-20">
+                <div className="max-w-3xl z-10">
+                    <h1
+                        className="text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+                        style={{ fontFamily: font.headerFont }}
+                    >
+                        {headline}
+                    </h1>
+                    <p className="text-xl opacity-80 mb-10 max-w-xl leading-relaxed">
+                        {subheadline}
+                    </p>
+                    <div className="flex gap-4 items-center">
+                        <button
+                            className={btnClassHero}
+                            style={btnStyleHero}
+                        >
+                            {ctaText}
+                        </button>
+                        <button
+                            className={btnClassSecondary}
+                            style={btnStyleSecondary}
+                        >
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+
+                {/* Abstract Visual / Features */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/3 h-2/3 mr-12 rounded-3xl opacity-20 flex flex-col gap-4 p-8 justify-center"
+                    style={{ backgroundColor: colors.primary }}>
+                    {features.map((feat, i) => (
+                        <div key={i} className="flex items-center gap-4">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: colors.accent }}></div>
+                            <span className="font-bold text-lg" style={{ fontFamily: font.headerFont }}>{feat}</span>
+                        </div>
+                    ))}
+                </div>
+            </main>
 
             {/* Features Grid */}
             <div className="py-24" style={{ backgroundColor: `${colors.primary}10` }}>
@@ -111,7 +149,7 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
                     <p className="text-xl opacity-80">
                         Join thousands of satisfied customers today.
                     </p>
-                    <button className={btnClass} style={btnStyle}>
+                    <button className={btnClassPrimary} style={btnStylePrimary}>
                         Create Account Now
                     </button>
                 </div>
