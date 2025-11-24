@@ -28,27 +28,35 @@ export const generateBrandConcepts = async (mission: string): Promise<BrandConce
 export const generateBrandImage = async (prompt: string, size: ImageSize): Promise<string> => {
   const ai = await getAIClient();
 
-  // Using gemini-3-pro-image-preview as requested for high quality
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-image-preview',
-    contents: {
-      parts: [{ text: prompt }]
-    },
-    config: {
-      imageConfig: {
-        imageSize: size, // 1K, 2K, or 4K
-        aspectRatio: '1:1'
+  try {
+    // Using gemini-3-pro-image-preview as requested for high quality
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: {
+        parts: [{ text: prompt }]
+      },
+      config: {
+        imageConfig: {
+          imageSize: size, // 1K, 2K, or 4K
+          aspectRatio: '1:1'
+        }
+      }
+    });
+
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-  });
 
-  for (const part of response.candidates?.[0]?.content?.parts || []) {
-    if (part.inlineData) {
-      return `data:image/png;base64,${part.inlineData.data}`;
+    throw new Error("No image generated.");
+  } catch (error: any) {
+    // Check for 429 or Resource Exhausted errors
+    if (error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED') || error.status === 429) {
+      throw new Error("QUOTA_EXCEEDED");
     }
+    throw error;
   }
-
-  throw new Error("No image generated.");
 };
 
 export const getChatResponse = async (history: { role: string, parts: { text: string }[] }[], message: string, context: string) => {

@@ -28,7 +28,7 @@ export const FONTS: FontPair[] = [
     { name: "Tech Mono", headerFont: "Space Grotesk", bodyFont: "DM Sans", description: "Geometric and technical, perfect for dev tools." },
     { name: "Friendly Round", headerFont: "Quicksand", bodyFont: "Nunito", description: "Soft, rounded corners for an approachable vibe." },
     { name: "Bold Editorial", headerFont: "Oswald", bodyFont: "Lora", description: "Strong, tall headers paired with a classic serif." },
-    { name: "Startup Pop", headerFont: "Clash Display", bodyFont: "General Sans", description: "Trendy, characterful sans-serifs popular in 2025." },
+    { name: "Startup Pop", headerFont: "Chivo", bodyFont: "Public Sans", description: "Trendy, characterful sans-serifs popular in 2025." },
     { name: "Minimalist Swiss", headerFont: "IBM Plex Sans", bodyFont: "IBM Plex Sans", description: "Objective, rational, and grid-friendly." },
     { name: "Retro Warmth", headerFont: "Fraunces", bodyFont: "Mulish", description: "Soft serif with a 70s throwback feel." },
     { name: "Industrial", headerFont: "Teko", bodyFont: "Rajdhani", description: "Squared-off and mechanical." },

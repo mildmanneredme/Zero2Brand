@@ -14,60 +14,102 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const generateLocalLogo = (text: string, size: ImageSize): string => {
+    const canvas = document.createElement('canvas');
+    // Map size enum to pixels
+    const pixelSize = size === ImageSize.Size4K ? 4096 : size === ImageSize.Size2K ? 2048 : 1024;
+    canvas.width = pixelSize;
+    canvas.height = pixelSize;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return '';
+
+    // Draw background
+    const colors = ['#1a1a1a', '#3b82f6', '#2f5233', '#6366f1', '#fbbf24', '#000000'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    ctx.fillStyle = randomColor;
+    ctx.fillRect(0, 0, pixelSize, pixelSize);
+
+    // Draw text (Initials)
+    const initials = text.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const fontSize = Math.floor(pixelSize * 0.4);
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(initials, pixelSize / 2, pixelSize / 2);
+
+    // Add "Mock" label
+    const mockFontSize = Math.floor(pixelSize * 0.05);
+    ctx.font = `${mockFontSize}px sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillText('Local Preview Mode', pixelSize / 2, pixelSize * 0.8);
+
+    return canvas.toDataURL('image/png');
+  };
+
+  const processAndSetImage = async (url: string) => {
+    // Apply Watermark
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = url;
+
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+
+    if (ctx) {
+      // Draw original image
+      ctx.drawImage(img, 0, 0);
+
+      // Configure watermark style
+      const fontSize = Math.floor(img.width * 0.05); // 5% of image width
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+
+      // Add shadow for better visibility on light backgrounds
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+
+      // Draw text
+      const padding = Math.floor(img.width * 0.02);
+      ctx.fillText('Zero2Brand', img.width - padding, img.height - padding);
+
+      const watermarkedUrl = canvas.toDataURL('image/png');
+      setGeneratedUrl(watermarkedUrl);
+      onImageGenerated(watermarkedUrl, selectedSize);
+    } else {
+      // Fallback if canvas fails
+      setGeneratedUrl(url);
+      onImageGenerated(url, selectedSize);
+    }
+  };
+
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
     try {
       const rawUrl = await generateBrandImage(prompt, selectedSize);
-
-      // Apply Watermark
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = rawUrl;
-
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-
-      if (ctx) {
-        // Draw original image
-        ctx.drawImage(img, 0, 0);
-
-        // Configure watermark style
-        const fontSize = Math.floor(img.width * 0.05); // 5% of image width
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-
-        // Add shadow for better visibility on light backgrounds
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
-
-        // Draw text
-        const padding = Math.floor(img.width * 0.02);
-        ctx.fillText('Zero2Brand', img.width - padding, img.height - padding);
-
-        const watermarkedUrl = canvas.toDataURL('image/png');
-        setGeneratedUrl(watermarkedUrl);
-        onImageGenerated(watermarkedUrl, selectedSize);
+      await processAndSetImage(rawUrl);
+    } catch (e: any) {
+      if (e.message === "QUOTA_EXCEEDED") {
+        setError("API Quota Exceeded. Switched to local preview mode.");
+        const localUrl = generateLocalLogo(prompt, selectedSize);
+        await processAndSetImage(localUrl);
       } else {
-        // Fallback if canvas fails
-        setGeneratedUrl(rawUrl);
-        onImageGenerated(rawUrl, selectedSize);
+        setError("Failed to generate image. Please try again. Ensure you have a valid API Key selected.");
+        console.error(e);
       }
-
-    } catch (e) {
-      setError("Failed to generate image. Please try again. Ensure you have a valid API Key selected.");
-      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -86,8 +128,8 @@ export const LogoGenerator: React.FC<LogoGeneratorProps> = ({ prompt, type, onIm
               key={size}
               onClick={() => setSelectedSize(size)}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${selectedSize === size
-                  ? 'bg-indigo-600 text-white border border-indigo-500'
-                  : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'
+                ? 'bg-indigo-600 text-white border border-indigo-500'
+                : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'
                 }`}
             >
               {size}
