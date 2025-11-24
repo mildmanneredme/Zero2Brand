@@ -11,14 +11,19 @@ import { FontLoader } from './components/FontLoader';
 import { FONTS, PALETTES, BUTTON_STYLES, BUTTON_ANIMATIONS } from './data/variations';
 import { generateBrandConcepts, generateBrandImage, generateSiteContent, generateLogoVariations } from './services/gemini';
 import { generateFallbackLogos } from './utils/fallbackLogos';
+import { generateFallbackLogos } from './utils/fallbackLogos';
 import { LogoModal } from './components/LogoModal';
+import { BrandAssetKit } from './components/BrandAssetKit';
 
 enum AppState {
   Input,
   LiveBuilder,
   GenerateAssets,
   Dashboard,
-  Preview
+  GenerateAssets,
+  Dashboard,
+  Preview,
+  AssetKit
 }
 
 const App: React.FC = () => {
