@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FONTS, PALETTES, BUTTON_STYLES } from '../data/variations';
+import { getButtonDynamicStyles } from '../utils/styleHelpers';
 
 interface ConfiguratorProps {
     selectedFontIndex: number;
@@ -54,8 +55,8 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 py-3 text-sm font-medium capitalize transition-colors ${activeTab === tab
-                                ? 'text-indigo-400 border-b-2 border-indigo-400 bg-slate-800/50'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                            ? 'text-indigo-400 border-b-2 border-indigo-400 bg-slate-800/50'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
                             }`}
                     >
                         {tab}
@@ -70,8 +71,8 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
                         key={index}
                         onClick={() => onFontChange(index)}
                         className={`w-full text-left p-3 rounded-lg border transition-all ${selectedFontIndex === index
-                                ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
-                                : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                            ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
+                            : 'bg-slate-800 border-slate-700 hover:border-slate-600'
                             }`}
                     >
                         <div className="flex justify-between items-center mb-1">
@@ -92,8 +93,8 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
                         key={index}
                         onClick={() => onPaletteChange(index)}
                         className={`w-full text-left p-3 rounded-lg border transition-all ${selectedPaletteIndex === index
-                                ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
-                                : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                            ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
+                            : 'bg-slate-800 border-slate-700 hover:border-slate-600'
                             }`}
                     >
                         <div className="flex justify-between items-center mb-2">
@@ -112,26 +113,30 @@ export const Configurator: React.FC<ConfiguratorProps> = ({
                     </button>
                 ))}
 
-                {activeTab === 'buttons' && BUTTON_STYLES.map((style, index) => (
-                    <button
-                        key={index}
-                        onClick={() => onButtonChange(index)}
-                        className={`w-full text-left p-4 rounded-lg border transition-all ${selectedButtonIndex === index
+                {activeTab === 'buttons' && BUTTON_STYLES.map((style, index) => {
+                    const { className: btnClass, style: btnStyle } = getButtonDynamicStyles(style, PALETTES[selectedPaletteIndex]);
+
+                    return (
+                        <button
+                            key={index}
+                            onClick={() => onButtonChange(index)}
+                            className={`w-full text-left p-4 rounded-lg border transition-all ${selectedButtonIndex === index
                                 ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
                                 : 'bg-slate-800 border-slate-700 hover:border-slate-600'
-                            }`}
-                    >
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-white font-medium">{style.name}</span>
-                            {selectedButtonIndex === index && <span className="text-indigo-400 text-xs">Active</span>}
-                        </div>
-                        <div className="flex justify-center bg-slate-900/50 p-4 rounded border border-slate-700/50">
-                            <div className={style.classes}>
-                                Button Preview
+                                }`}
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="text-white font-medium">{style.name}</span>
+                                {selectedButtonIndex === index && <span className="text-indigo-400 text-xs">Active</span>}
                             </div>
-                        </div>
-                    </button>
-                ))}
+                            <div className="flex justify-center bg-slate-900/50 p-4 rounded border border-slate-700/50">
+                                <div className={btnClass} style={btnStyle}>
+                                    Button Preview
+                                </div>
+                            </div>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Footer */}

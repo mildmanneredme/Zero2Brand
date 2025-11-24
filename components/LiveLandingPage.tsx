@@ -1,5 +1,6 @@
 import React from 'react';
 import { FontPair, ColorPalette, ButtonStyle } from '../data/variations';
+import { getButtonDynamicStyles } from '../utils/styleHelpers';
 
 interface LiveLandingPageProps {
     font: FontPair;
@@ -10,6 +11,7 @@ interface LiveLandingPageProps {
 
 export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette, buttonStyle, mission }) => {
     const { colors } = palette;
+    const { className: btnClass, style: btnStyle } = getButtonDynamicStyles(buttonStyle, palette);
 
     return (
         <div
@@ -39,7 +41,7 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
                         <a href="#" className="hover:opacity-70 transition-opacity">Features</a>
                         <a href="#" className="hover:opacity-70 transition-opacity">Pricing</a>
                         <a href="#" className="hover:opacity-70 transition-opacity">About</a>
-                        <button className={buttonStyle.classes}>
+                        <button className={btnClass} style={btnStyle}>
                             Get Started
                         </button>
                     </div>
@@ -60,7 +62,7 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
                             {mission || "We help companies scale their vision with cutting-edge tools and design systems that work for everyone."}
                         </p>
                         <div className="flex gap-4">
-                            <button className={buttonStyle.classes}>
+                            <button className={btnClass} style={btnStyle}>
                                 Start Free Trial
                             </button>
                             <button
@@ -138,7 +140,7 @@ export const LiveLandingPage: React.FC<LiveLandingPageProps> = ({ font, palette,
                     <p className="text-xl opacity-80">
                         Join thousands of satisfied customers today.
                     </p>
-                    <button className={buttonStyle.classes}>
+                    <button className={btnClass} style={btnStyle}>
                         Create Account Now
                     </button>
                 </div>
