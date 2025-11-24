@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { generateBrandConcepts } from './services/gemini';
 import { BrandConcept, ImageSize } from './types';
-import { ConceptCard } from './components/ConceptCard';
 import { LogoGenerator } from './components/LogoGenerator';
 import { BrandDashboard } from './components/BrandDashboard';
 import { ChatWidget } from './components/ChatWidget';
 import { StyleGuide } from './components/StyleGuide';
+import { LiveLandingPage } from './components/LiveLandingPage';
+import { Configurator } from './components/Configurator';
+import { FONTS, PALETTES, BUTTON_STYLES } from './data/variations';
 
 enum AppState {
   Input,
-  GeneratingConcepts,
-  SelectConcept,
+  LiveBuilder,
   GenerateAssets,
   Dashboard,
   Preview
@@ -19,8 +19,14 @@ enum AppState {
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.Input);
   const [mission, setMission] = useState('');
-  const [concepts, setConcepts] = useState<BrandConcept[]>([]);
-  const [selectedConcept, setSelectedConcept] = useState<BrandConcept | null>(null);
+
+  // Live Builder State
+  const [selectedFontIndex, setSelectedFontIndex] = useState(0);
+  const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
+  const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
+
+  // Derived Concept (constructed from live builder state)
+  const [finalConcept, setFinalConcept] = useState<BrandConcept | null>(null);
 
   // Assets
   const [primaryLogo, setPrimaryLogo] = useState<string | undefined>(undefined);
@@ -29,12 +35,8 @@ const App: React.FC = () => {
 
   const [hasApiKey, setHasApiKey] = useState(false);
 
-  // Check API key availability on mount (though we use process.env usually, 
-  // we check the window object for the specific key selection requirement of Veo/High-end image models logic)
   useEffect(() => {
     const checkKey = async () => {
-      // In this specific playground environment, process.env.API_KEY is injected if available.
-      // However, for high-end models, we might need to trigger the selector if not present.
       if (process.env.API_KEY) {
         setHasApiKey(true);
       } else if (window.aistudio) {
@@ -48,28 +50,53 @@ const App: React.FC = () => {
   const handleApiKeySelect = async () => {
     if (window.aistudio) {
       await window.aistudio.openSelectKey();
-      // As per instructions, assume success immediately after triggering openSelectKey.
-      // Do not check return value as it is void.
       setHasApiKey(true);
     }
   };
 
-  const handleGenerateConcepts = async () => {
+  const handleStartBuilder = () => {
     if (!mission.trim()) return;
-    setState(AppState.GeneratingConcepts);
-    try {
-      const results = await generateBrandConcepts(mission);
-      setConcepts(results);
-      setState(AppState.SelectConcept);
-    } catch (e) {
-      console.error(e);
-      alert("Failed to generate concepts. Please ensure you have a valid API Key.");
-      setState(AppState.Input);
-    }
+    // Randomize initial state for variety
+    setSelectedFontIndex(Math.floor(Math.random() * FONTS.length));
+    setSelectedPaletteIndex(Math.floor(Math.random() * PALETTES.length));
+    setSelectedButtonIndex(Math.floor(Math.random() * BUTTON_STYLES.length));
+    setState(AppState.LiveBuilder);
   };
 
-  const handleSelectConcept = (concept: BrandConcept) => {
-    setSelectedConcept(concept);
+  const handleBuilderComplete = () => {
+    // Construct the final concept object from the selected variations
+    const font = FONTS[selectedFontIndex];
+    const palette = PALETTES[selectedPaletteIndex];
+    const button = BUTTON_STYLES[selectedButtonIndex];
+
+    const concept: BrandConcept = {
+      id: `custom-${Date.now()}`,
+      name: `${palette.name} ${font.name}`,
+      description: `A custom brand identity built for: "${mission}"`,
+      colors: [
+        { hex: palette.colors.primary, name: "Primary", usage: "Main Brand Color" },
+        { hex: palette.colors.secondary, name: "Secondary", usage: "Supporting Color" },
+        { hex: palette.colors.accent, name: "Accent", usage: "Highlights" },
+        { hex: palette.colors.background, name: "Background", usage: "Page Background" },
+        { hex: palette.colors.text, name: "Text", usage: "Body Text" }
+      ],
+      typography: {
+        headerFont: font.headerFont,
+        bodyFont: font.bodyFont,
+        reasoning: font.description
+      },
+      buttonStyle: {
+        tailwindClasses: button.classes,
+        description: button.description,
+        borderRadius: "custom",
+        shadow: "custom"
+      },
+      logoPrompt: `A minimal, modern logo for a brand with mission: "${mission}". Primary color: ${palette.colors.primary}. Style: ${font.name}. Vector graphics, white background.`,
+      secondaryMarkPrompt: `A simple icon symbol for a brand with mission: "${mission}". Color: ${palette.colors.accent}. Style: Flat, minimal.`,
+      vibeCoderPrompt: `Reskin the app using ${font.headerFont} for headers and ${font.bodyFont} for body. Primary color is ${palette.colors.primary}. Buttons should be ${button.description}.`
+    };
+
+    setFinalConcept(concept);
     setState(AppState.GenerateAssets);
   };
 
@@ -80,8 +107,7 @@ const App: React.FC = () => {
   const handleReset = () => {
     setState(AppState.Input);
     setMission('');
-    setConcepts([]);
-    setSelectedConcept(null);
+    setFinalConcept(null);
     setPrimaryLogo(undefined);
     setSecondaryMark(undefined);
   };
@@ -120,6 +146,29 @@ const App: React.FC = () => {
     return <StyleGuide onBack={() => setState(AppState.Input)} />;
   }
 
+  // Live Builder Mode (Full Screen Overlay)
+  if (state === AppState.LiveBuilder) {
+    return (
+      <div className="relative">
+        <LiveLandingPage
+          font={FONTS[selectedFontIndex]}
+          palette={PALETTES[selectedPaletteIndex]}
+          buttonStyle={BUTTON_STYLES[selectedButtonIndex]}
+          mission={mission}
+        />
+        <Configurator
+          selectedFontIndex={selectedFontIndex}
+          selectedPaletteIndex={selectedPaletteIndex}
+          selectedButtonIndex={selectedButtonIndex}
+          onFontChange={setSelectedFontIndex}
+          onPaletteChange={setSelectedPaletteIndex}
+          onButtonChange={setSelectedButtonIndex}
+          onComplete={handleBuilderComplete}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200">
       {/* Navbar */}
@@ -137,7 +186,7 @@ const App: React.FC = () => {
               >
                 Style Guide
               </button>
-              {[AppState.SelectConcept, AppState.GenerateAssets, AppState.Dashboard].includes(state) &&
+              {[AppState.GenerateAssets, AppState.Dashboard].includes(state) &&
                 <div className="text-xs font-mono text-slate-500 px-2 py-1 bg-slate-800 rounded">gemini-3-pro</div>
               }
             </div>
@@ -175,11 +224,11 @@ const App: React.FC = () => {
                   View Style Guide
                 </button>
                 <button
-                  onClick={handleGenerateConcepts}
+                  onClick={handleStartBuilder}
                   disabled={!mission.trim()}
                   className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
                 >
-                  Generate Concepts
+                  Start Builder
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
                 </button>
               </div>
@@ -187,43 +236,8 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Step 1.5: Loading Concepts */}
-        {state === AppState.GeneratingConcepts && (
-          <div className="flex flex-col items-center justify-center h-[60vh] space-y-6">
-            <div className="relative w-24 h-24">
-              <div className="absolute inset-0 border-4 border-indigo-500/30 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-white">Dreaming up ideas...</h2>
-              <p className="text-slate-400">Gemini 3 Pro is analyzing your mission.</p>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Select Concept */}
-        {state === AppState.SelectConcept && (
-          <div className="space-y-8 animate-fade-in">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-2">Choose a Direction</h2>
-              <p className="text-slate-400">Select the vibe that best matches your vision.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {concepts?.map((concept) => (
-                <ConceptCard
-                  key={concept.id}
-                  concept={concept}
-                  onSelect={handleSelectConcept}
-                  isSelected={false}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Generate Assets */}
-        {state === AppState.GenerateAssets && selectedConcept && (
+        {/* Step 3: Generate Assets (Reused) */}
+        {state === AppState.GenerateAssets && finalConcept && (
           <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-white mb-2">Bring it to life</h2>
@@ -235,11 +249,11 @@ const App: React.FC = () => {
               <div className="space-y-4">
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
                   <p className="text-xs text-slate-500 uppercase font-bold mb-2">Prompt Strategy</p>
-                  <p className="text-sm text-slate-300 italic">{selectedConcept.logoPrompt}</p>
+                  <p className="text-sm text-slate-300 italic">{finalConcept.logoPrompt}</p>
                 </div>
                 <LogoGenerator
                   type="Primary Logo"
-                  prompt={selectedConcept.logoPrompt}
+                  prompt={finalConcept.logoPrompt}
                   onImageGenerated={(url, size) => {
                     setPrimaryLogo(url);
                     setPrimaryLogoSize(size);
@@ -251,11 +265,11 @@ const App: React.FC = () => {
               <div className="space-y-4">
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
                   <p className="text-xs text-slate-500 uppercase font-bold mb-2">Prompt Strategy</p>
-                  <p className="text-sm text-slate-300 italic">{selectedConcept.secondaryMarkPrompt}</p>
+                  <p className="text-sm text-slate-300 italic">{finalConcept.secondaryMarkPrompt}</p>
                 </div>
                 <LogoGenerator
                   type="Secondary Mark"
-                  prompt={selectedConcept.secondaryMarkPrompt}
+                  prompt={finalConcept.secondaryMarkPrompt}
                   onImageGenerated={(url) => setSecondaryMark(url)}
                 />
               </div>
@@ -274,9 +288,9 @@ const App: React.FC = () => {
         )}
 
         {/* Step 4: Dashboard */}
-        {state === AppState.Dashboard && selectedConcept && (
+        {state === AppState.Dashboard && finalConcept && (
           <BrandDashboard
-            concept={selectedConcept}
+            concept={finalConcept}
             logoUrl={primaryLogo}
             logoSize={primaryLogoSize}
             secondaryUrl={secondaryMark}
@@ -285,9 +299,9 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Chat Bot - Always available if we have concept context or just generally */}
+      {/* Floating Chat Bot */}
       <ChatWidget
-        context={selectedConcept ? JSON.stringify(selectedConcept) : mission || "No brand defined yet."}
+        context={finalConcept ? JSON.stringify(finalConcept) : mission || "No brand defined yet."}
       />
     </div>
   );
